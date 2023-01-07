@@ -13,14 +13,12 @@ from fairpy import AgentList
 from fairpy.allocations import Allocation
 import networkx as nx
 import logging
-import improvingPreformance.utilsCpp as utilsCpp
-import utils as utilsPython
-utils = None
+import utils
 
 logger = logging.getLogger(__name__)
 
 agents_to_test_0 = AgentList({"Shlomo": {"A": 0, "B": 1, "C": 2, "D": 3},"Shira": {"A": 2, "B": 0, "C": 1, "D": 3},"Hadar": {"A": 2, "B": 0, "C": 1, "D": 3},"Or": {"A": 3, "B": 2, "C": 1, "D": 0}})
-def proportional_division_equal_number_of_items_and_players(agents: AgentList , improvingPerformance=False) -> Allocation:
+def proportional_division_equal_number_of_items_and_players(agents: AgentList) -> Allocation:
     """
     Proposition 2 from "Proportional Borda Allocations":
     Finds a proportional division for the items 
@@ -43,8 +41,6 @@ def proportional_division_equal_number_of_items_and_players(agents: AgentList , 
     >>> proportional_division_equal_number_of_items_and_players(agents=AgentList([[0]])).map_agent_to_bundle()
     {'Agent #0': [0]}
     """
-    utils = utilsCpp if improvingPerformance else utilsPython
-
     if not utils.isBordaCount(agents):
         raise ValueError(f'Evaluation of items by the agents must be defined by "Board scores". but it is not')
     items = list(agents.all_items())
@@ -62,7 +58,7 @@ def proportional_division_equal_number_of_items_and_players(agents: AgentList , 
     bundles = utils.bundles_from_edges(match, G)
     return Allocation(agents, bundles)
 
-def proportional_division_with_p_even(agents: AgentList, improvingPerformance=False) -> Allocation:
+def proportional_division_with_p_even(agents: AgentList) -> Allocation:
     """
     Proposition 3 from "Proportional Borda Allocations":
     Finds a proportional division for the items
@@ -76,7 +72,6 @@ def proportional_division_with_p_even(agents: AgentList, improvingPerformance=Fa
     >>> proportional_division_with_p_even(agents=AgentList([[0,1,2,3],[2,0,1,3]])).map_agent_to_bundle()
     {'Agent #0': [1, 3], 'Agent #1': [0, 2]}
     """
-    utils = utilsCpp if improvingPerformance else utilsPython
     n = len(agents)
     k = len(agents.all_items())
     if k % n != 0:
@@ -94,7 +89,7 @@ def proportional_division_with_p_even(agents: AgentList, improvingPerformance=Fa
     return Allocation(agents, allocation)
 
 agents_to_test_1 = AgentList([[14,13,12,11,10,9,8,7,6,5,4,3,2,1,0],[14,13,12,11,10,9,8,7,6,5,4,3,2,1,0],[14,13,12,11,10,9,8,7,6,5,4,3,2,1,0]])
-def proportional_division_with_number_of_agents_odd(agents: AgentList, improvingPerformance=False) -> Allocation:
+def proportional_division_with_number_of_agents_odd(agents: AgentList) -> Allocation:
     """
     Theorem 1 from "Proportional Borda Allocations":
     Finds a proportional division for the items
@@ -108,14 +103,13 @@ def proportional_division_with_number_of_agents_odd(agents: AgentList, improving
     >>> proportional_division_with_number_of_agents_odd(agents=agents_to_test_1).map_agent_to_bundle()
     {'Agent #0': [0, 4, 8, 9, 14], 'Agent #1': [1, 5, 6, 10, 13], 'Agent #2': [2, 3, 7, 11, 12]}
     """
-    utils = utilsCpp if improvingPerformance else utilsPython
     n = len(agents)
     if utils.isEven(n):
         raise ValueError(f"The number of agents must be odd but it is not: {n}")
     logger.info("The number of agents n equals %d is odd, therefore There is a proportional division and the proportional division function returns it", n)
     return proportional_division(agents)
 
-def proportional_division(agents: AgentList, improvingPerformance=False) -> Allocation:
+def proportional_division(agents: AgentList) -> Allocation:
     """
     Theorem 3 from "Proportional Borda Allocations":
     Finds a proportional division for the items
@@ -137,7 +131,6 @@ def proportional_division(agents: AgentList, improvingPerformance=False) -> Allo
     >>> proportional_division(agents= AgentList({"Shlomo": [0,1,2,3],"Dani": [2,0,1,3]})).map_agent_to_bundle()
     {'Shlomo': [1, 3], 'Dani': [0, 2]}
     """
-    utils = utilsCpp if improvingPerformance else utilsPython
     n = len(agents)
     k = len(agents.all_items())
     if not k % n == 0:
@@ -160,6 +153,9 @@ def proportional_division(agents: AgentList, improvingPerformance=False) -> Allo
     unselected_items, allocation = utils.selection_by_order(agents, items=items, allocation=allocation, order=order)
     _, allocation = utils.selection_by_order(agents, items=unselected_items, allocation=allocation, num_iteration=int(p/2))
     return Allocation(agents, allocation)
+
+
+
 
 
 ### MAIN

@@ -2,5 +2,5 @@ from setuptools import setup
 from Cython.Build import cythonize
 
 setup(
-    ext_modules = cythonize("utilsCpp.pyx")
+    ext_modules = cythonize("proportional_borda_allocations.pyx")
 )
